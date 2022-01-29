@@ -1,0 +1,12 @@
+<products xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="products.xsd">
+    <product code="S10_1678">
+        <name>1969 Harley Davidson Ultimate Chopper</name>
+        <line>Motorcycles</line>
+        <scale>1:10</scale>
+        <vendor>Min Lin Diecast</vendor>
+        <description>This replica features working kickstand, front suspension, gear-shift lever, footbrake lever, drive chain, wheels and steering. All parts are particularly delicate due to their precise scale and require special care and attention.</description>
+        <quantityInStock>7933</quantityInStock>
+        <buyPrice>48.81</buyPrice>
+        <MSRP>95.70</MSRP>
+    </product>
+</products>
