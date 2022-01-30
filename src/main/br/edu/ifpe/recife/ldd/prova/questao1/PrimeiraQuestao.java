@@ -15,24 +15,125 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
 
 public class PrimeiraQuestao {
     public static String PATH = "src/main/resources/provided/products.xml";
-    public static String RESULT_PATH = "src/main/resources/results/question_1.xml";
+    public static String RESULT_A_PATH = "src/main/resources/results/question_1_A.xml";
+    public static String RESULT_B_PATH = "src/main/resources/results/question_1_B.xml";
 
 
-    public static Element createThElement(Document out, String value) {
-        Element th = out.createElement("th");
+    public static Element createElement(String elementName, Document out, String value) {
+        Element th = out.createElement(elementName);
         th.setTextContent(value);
         return th;
     }
 
 
+    public static void gerarTabelaPercentual(TransformerFactory transformerFactory, DocumentBuilder db, List<Product> products) {
+
+        try {
+            Document out = db.newDocument();
+            Element ol = out.createElement("ol");
+
+            products
+                .stream()
+                .peek(product -> {
+                    double percent= ((product.getBuyPrice() * 100) / product.getMsrp());
+                    product.setPercent(percent);
+                })
+                .sorted(Comparator.comparing(Product::getPercent).reversed())
+                .forEach(product -> {
+                    Element li = out.createElement("li");
+
+                    StringBuilder value = new StringBuilder();
+
+                    value.append(product.getName());
+                    value.append(" (");
+                    value.append((long) product.getPercent());
+                    value.append("%)");
+
+                    li.setTextContent(value.toString());
+                    ol.appendChild(li);
+                });
+
+
+            out.appendChild(ol);
+
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(out);
+
+            File resultFile = new File(RESULT_B_PATH);
+
+            StreamResult result = new StreamResult(resultFile);
+
+            transformer.transform(source, result);
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getClass().getName() + " | " +  e.getMessage());
+        }
+
+    }
+
+    public static void gerarTabelaHtmlOrdenada(TransformerFactory transformerFactory, DocumentBuilder db, List<Product> products) {
+        products.sort(Comparator.comparing(Product::getName));
+
+        try {
+           Document out = db.newDocument();
+           Element table= out.createElement("table");
+           Element tHead = out.createElement("thead");
+           Element tr = out.createElement("tr");
+
+           tr.appendChild(createElement("th", out, "Name"));
+           tr.appendChild(createElement("th", out, "Line"));
+           tr.appendChild(createElement("th", out, "Vendor"));
+           tr.appendChild(createElement("th", out, "Quantity in Stock"));
+           tr.appendChild(createElement("th", out, "Buy Price"));
+
+           tHead.appendChild(tr);
+           table.appendChild(tHead);
+
+           Element tBody = out.createElement("tbody");
+
+
+           products
+               .stream()
+               .sorted(Comparator.comparing(Product::getName))
+               .forEach(product -> {
+                   Element trItem = out.createElement("tr");
+
+                   trItem.appendChild(createElement("th", out, product.getName()));
+                   trItem.appendChild(createElement("th", out, product.getLine()));
+                   trItem.appendChild(createElement("th", out, product.getVendor()));
+                   trItem.appendChild(createElement("th", out, String.valueOf(product.getQuantityInStock())));
+                   trItem.appendChild(createElement("th", out, String.valueOf(product.getBuyPrice())));
+
+                   tBody.appendChild(trItem);
+               });
+
+
+           table.appendChild(tBody);
+
+           out.appendChild(table);
+           Transformer transformer = transformerFactory.newTransformer();
+           DOMSource source = new DOMSource(out);
+
+           File resultFile = new File(RESULT_A_PATH);
+
+           StreamResult result = new StreamResult(resultFile);
+
+           transformer.transform(source, result);
+       } catch (TransformerException e) {
+           System.out.println("Error: " + e.getClass().getName() + " | " +  e.getMessage());
+       }
+    }
+
     public static void main(String[] args) {
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
             File file = new File(PATH);
 
@@ -64,50 +165,9 @@ public class PrimeiraQuestao {
                 products.add(product);
             }
 
-            products.sort(Comparator.comparing(p -> p.getName()));
-
-            Document out = db.newDocument();
-            Element table= out.createElement("table");
-            Element tHead = out.createElement("thead");
-            Element tr = out.createElement("tr");
-
-            tr.appendChild(createThElement(out, "Name"));
-            tr.appendChild(createThElement(out, "Line"));
-            tr.appendChild(createThElement(out, "Vendor"));
-            tr.appendChild(createThElement(out, "Quantity in Stock"));
-            tr.appendChild(createThElement(out, "Buy Price"));
-
-            tHead.appendChild(tr);
-            table.appendChild(tHead);
-
-            Element tBody = out.createElement("tbody");
-
-            for(Product product: products) {
-                tr = out.createElement("tr");
-
-                tr.appendChild(createThElement(out, product.getName()));
-                tr.appendChild(createThElement(out, product.getLine()));
-                tr.appendChild(createThElement(out, product.getVendor()));
-                tr.appendChild(createThElement(out, String.valueOf(product.getQuantityInStock())));
-                tr.appendChild(createThElement(out, String.valueOf(product.getBuyPrice())));
-
-                tBody.appendChild(tr);
-            }
-
-            table.appendChild(tBody);
-
-            out.appendChild(table);
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            DOMSource source = new DOMSource(out);
-
-            File resultFile = new File(RESULT_PATH);
-
-            StreamResult result = new StreamResult(resultFile);
-
-            transformer.transform(source, result);
-
-        } catch(TransformerException | ParserConfigurationException | IOException | SAXException e) {
+            gerarTabelaHtmlOrdenada(transformerFactory, db, products);
+            gerarTabelaPercentual(transformerFactory, db, products);
+        } catch(SAXException | ParserConfigurationException | IOException e) {
             System.out.println("Error: " + e.getClass().getName() + " | " +  e.getMessage());
         }
     }

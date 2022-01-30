@@ -9,6 +9,7 @@ public class Product {
     private Integer quantityInStock;
     private Double buyPrice;
     private Double msrp;
+    private double percent;
 
     public Product(String name, String line, String scale, String vendor, String description, Integer quantityInStock, Double buyPrice, Double msrp) {
         this.name = name;
@@ -83,6 +84,14 @@ public class Product {
 
     public void setMsrp(Double msrp) {
         this.msrp = msrp;
+    }
+
+    public double getPercent() {
+        return percent;
+    }
+
+    public void setPercent(double percent) {
+        this.percent = percent;
     }
 
     @Override
