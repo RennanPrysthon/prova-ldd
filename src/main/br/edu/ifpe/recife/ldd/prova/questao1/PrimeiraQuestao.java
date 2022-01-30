@@ -1,5 +1,6 @@
 package br.edu.ifpe.recife.ldd.prova.questao1;
 
+import br.edu.ifpe.recife.ldd.prova.Product;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -15,65 +16,16 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.*;
 
 public class PrimeiraQuestao {
     public static String PATH = "src/main/resources/provided/products.xml";
-    public static String RESULT_A_PATH = "src/main/resources/results/question_1_A.xml";
-    public static String RESULT_B_PATH = "src/main/resources/results/question_1_B.xml";
-
+    public static String RESULT_PATH = "src/main/resources/results/question_1_A.xml";
 
     public static Element createElement(String elementName, Document out, String value) {
         Element th = out.createElement(elementName);
         th.setTextContent(value);
         return th;
-    }
-
-
-    public static void gerarTabelaPercentual(TransformerFactory transformerFactory, DocumentBuilder db, List<Product> products) {
-
-        try {
-            Document out = db.newDocument();
-            Element ol = out.createElement("ol");
-
-            products
-                .stream()
-                .peek(product -> {
-                    double percent= ((product.getBuyPrice() * 100) / product.getMsrp());
-                    product.setPercent(percent);
-                })
-                .sorted(Comparator.comparing(Product::getPercent).reversed())
-                .forEach(product -> {
-                    Element li = out.createElement("li");
-
-                    StringBuilder value = new StringBuilder();
-
-                    value.append(product.getName());
-                    value.append(" (");
-                    value.append((long) product.getPercent());
-                    value.append("%)");
-
-                    li.setTextContent(value.toString());
-                    ol.appendChild(li);
-                });
-
-
-            out.appendChild(ol);
-
-            Transformer transformer = transformerFactory.newTransformer();
-            DOMSource source = new DOMSource(out);
-
-            File resultFile = new File(RESULT_B_PATH);
-
-            StreamResult result = new StreamResult(resultFile);
-
-            transformer.transform(source, result);
-
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getClass().getName() + " | " +  e.getMessage());
-        }
-
     }
 
     public static void gerarTabelaHtmlOrdenada(TransformerFactory transformerFactory, DocumentBuilder db, List<Product> products) {
@@ -119,7 +71,7 @@ public class PrimeiraQuestao {
            Transformer transformer = transformerFactory.newTransformer();
            DOMSource source = new DOMSource(out);
 
-           File resultFile = new File(RESULT_A_PATH);
+           File resultFile = new File(RESULT_PATH);
 
            StreamResult result = new StreamResult(resultFile);
 
@@ -166,7 +118,6 @@ public class PrimeiraQuestao {
             }
 
             gerarTabelaHtmlOrdenada(transformerFactory, db, products);
-            gerarTabelaPercentual(transformerFactory, db, products);
         } catch(SAXException | ParserConfigurationException | IOException e) {
             System.out.println("Error: " + e.getClass().getName() + " | " +  e.getMessage());
         }

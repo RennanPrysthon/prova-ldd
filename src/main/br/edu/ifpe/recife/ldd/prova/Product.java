@@ -1,4 +1,4 @@
-package br.edu.ifpe.recife.ldd.prova.questao1;
+package br.edu.ifpe.recife.ldd.prova;
 
 public class Product {
     private String name;
