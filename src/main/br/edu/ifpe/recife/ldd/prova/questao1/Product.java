@@ -1,4 +1,4 @@
-package br.edu.ifpe.recife.ldd;
+package br.edu.ifpe.recife.ldd.prova.questao1;
 
 public class Product {
     private String name;
@@ -9,6 +9,17 @@ public class Product {
     private Integer quantityInStock;
     private Double buyPrice;
     private Double msrp;
+
+    public Product(String name, String line, String scale, String vendor, String description, Integer quantityInStock, Double buyPrice, Double msrp) {
+        this.name = name;
+        this.line = line;
+        this.scale = scale;
+        this.vendor = vendor;
+        this.description = description;
+        this.quantityInStock = quantityInStock;
+        this.buyPrice = buyPrice;
+        this.msrp = msrp;
+    }
 
     public String getName() {
         return name;
