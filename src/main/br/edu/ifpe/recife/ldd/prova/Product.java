@@ -22,6 +22,8 @@ public class Product {
         this.msrp = msrp;
     }
 
+    public Product() {}
+
     public String getName() {
         return name;
     }
