@@ -17,8 +17,12 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PrimeiraQuestao {
+    private static final Logger logger = Logger.getLogger(PrimeiraQuestao.class.getName());
+
     public static String PATH = "src/main/resources/provided/products.xml";
     public static String RESULT_PATH = "src/main/resources/results/question_1_A.xml";
 
@@ -77,7 +81,7 @@ public class PrimeiraQuestao {
 
            transformer.transform(source, result);
        } catch (TransformerException e) {
-           System.out.println("Error: " + e.getClass().getName() + " | " +  e.getMessage());
+            logger.log(Level.SEVERE, "Error: " + e.getMessage(), e);
        }
     }
 
@@ -119,7 +123,7 @@ public class PrimeiraQuestao {
 
             gerarTabelaHtmlOrdenada(transformerFactory, db, products);
         } catch(SAXException | ParserConfigurationException | IOException e) {
-            System.out.println("Error: " + e.getClass().getName() + " | " +  e.getMessage());
+            logger.log(Level.SEVERE, "Error: " + e.getMessage(), e);
         }
     }
 }

@@ -13,9 +13,12 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class SegundaQuestao extends DefaultHandler {
+    private static final Logger logger = Logger.getLogger(SegundaQuestao.class.getName());
 
     public static String PATH = "src/main/resources/provided/products.xml";
     public static String RESULT_PATH = "src/main/resources/results/question_1_B.xml";
@@ -151,7 +154,7 @@ public class SegundaQuestao extends DefaultHandler {
             out.flush();
             out.close();
         } catch (Exception e) {
-            System.out.println("Error: " + e.getClass().getName() + " | " + e.getMessage());
+            logger.log(Level.SEVERE, "Error: " + e.getMessage(), e);
         }
     }
 
@@ -163,7 +166,7 @@ public class SegundaQuestao extends DefaultHandler {
             SAXParser saxParser = factory.newSAXParser();
             saxParser.parse(inputFile, handler);
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            System.out.println("Error: " + e.getClass().getName() + " | " + e.getMessage());
+            logger.log(Level.SEVERE, "Error: " + e.getMessage(), e);
         }
     }
 }

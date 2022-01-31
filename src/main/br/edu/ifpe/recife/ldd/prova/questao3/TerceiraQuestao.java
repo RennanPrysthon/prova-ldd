@@ -1,12 +1,10 @@
 package br.edu.ifpe.recife.ldd.prova.questao3;
 
 import br.edu.ifpe.recife.ldd.prova.Product;
-import com.sun.xml.internal.ws.api.ha.StickyFeature;
 
 import javax.xml.stream.*;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Level;
