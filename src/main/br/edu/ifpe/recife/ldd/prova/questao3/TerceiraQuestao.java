@@ -1,143 +1,128 @@
 package br.edu.ifpe.recife.ldd.prova.questao3;
 
 import br.edu.ifpe.recife.ldd.prova.Product;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import com.sun.xml.internal.ws.api.ha.StickyFeature;
 
-import javax.print.Doc;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
+import javax.xml.stream.*;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class TerceiraQuestao {
+    private static final Logger logger = Logger.getLogger(TerceiraQuestao.class.getName());
+
     public static String PATH = "src/main/resources/provided/products.xml";
     public static String RESULT_PATH = "src/main/resources/results/question_1_C.xml";
 
-    public static Element createThElement(Document out, String content) {
-        Element th = out.createElement("th");
-        th.setTextContent(content);
-        return th;
-    }
 
-    public static void gerarTabelaDetalhada(TransformerFactory transformerFactory, DocumentBuilder db, List<Product> products) {
-
-        List<String> fornecedores = products
-            .stream()
-            .map(Product::getVendor)
-            .sorted()
-            .collect(Collectors.toList());
-
-        fornecedores = new ArrayList<>(new HashSet<>(fornecedores));
-
+    public static void gerarResultado(HashSet<String> vendors, List<Product> products) {
 
         try {
-            Document out = db.newDocument();
-            Element table = out.createElement("table");
-            Element thead = out.createElement("thead");
-            Element tr = out.createElement("tr");
-            tr.appendChild(createThElement(out, "Vendor"));
-            tr.appendChild(createThElement(out, "Name"));
+            File result = new File(RESULT_PATH);
+            OutputStream outputStream = new FileOutputStream(result);
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, "utf-8");
 
-            thead.appendChild(tr);
-            table.appendChild(thead);
+            XMLStreamWriter out = XMLOutputFactory
+                    .newInstance()
+                    .createXMLStreamWriter(outputStreamWriter);
 
-            Element tbody = out.createElement("tbody");
+            out.writeStartElement("table");
 
-            for (String fornecedor: fornecedores) {
-                tr = out.createElement("tr");
-                Element td = out.createElement("td");
-                td.setTextContent(fornecedor);
+            out.writeStartElement("thead");
+            out.writeStartElement("tr");
+            out.writeStartElement("th");
+            out.writeCharacters("Vendor");
+            out.writeEndElement();
+            out.writeStartElement("th");
+            out.writeCharacters("Name");
+            out.writeEndElement();
+            out.writeEndElement();
+            out.writeEndElement();
 
-                tr.appendChild(td);
+            out.writeStartElement("tbody");
 
-                td = out.createElement("td");
-                Element ul = out.createElement("ul");
+            List<Product> filteredByVendor = new ArrayList<>();
+            for (String vendor : vendors) {
+                out.writeStartElement("tr");
+                out.writeStartElement("td");
+                out.writeCharacters(vendor);
+                out.writeEndElement();
 
-                List<Product> filteredProducts = products
-                    .stream()
-                    .filter(product -> product.getVendor().equals(fornecedor))
-                    .collect(Collectors.toList());
+                out.writeStartElement("td");
+                out.writeStartElement("ul");
 
-                for (Product filteredProduct: filteredProducts) {
-                    Element li = out.createElement("li");
-                    li.setTextContent(filteredProduct.getName());
-                    ul.appendChild(li);
+                filteredByVendor = products.stream().filter(p -> p.getVendor().equals(vendor)).collect(Collectors.toList());
+
+                for (Product product : filteredByVendor) {
+                    out.writeStartElement("li");
+                    out.writeCharacters(product.getName());
+                    out.writeEndElement();
+
                 }
 
-                td.appendChild(ul);
-
-                tr.appendChild(td);
-
-                tbody.appendChild(tr);
+                out.writeEndElement();
+                out.writeEndElement();
+                out.writeEndElement();
             }
 
-            table.appendChild(tbody);
-            out.appendChild(table);
+            out.writeEndElement();
+            out.writeEndElement();
+            out.writeEndDocument();
 
-            Transformer transformer = transformerFactory.newTransformer();
-            DOMSource source = new DOMSource(out);
-
-            File resultFile = new File(RESULT_PATH);
-
-            StreamResult result = new StreamResult(resultFile);
-
-            transformer.transform(source, result);
-
+            out.flush();
+            out.close();
         } catch (Exception e) {
-            System.out.println("Error: " + e.getClass().getName() + " | " +  e.getMessage());
+            logger.log(Level.SEVERE, "Error: " + e.getMessage(), e);
         }
 
     }
 
     public static void main(String[] args) {
         try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            FileInputStream fileInputStream = new FileInputStream(PATH);
+            XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+            XMLStreamReader xmlStreamReader = xmlInputFactory.createXMLStreamReader(fileInputStream);
 
-            File file = new File(PATH);
+            String name = "";
+            String vendor = "";
 
-            Document doc = db.parse(file);
-
-            NodeList list = doc.getElementsByTagName("product");
+            HashSet<String> vendors = new HashSet<>();
             List<Product> products = new ArrayList<>();
+            Product product;
 
-            for (int i = 0; i < list.getLength(); i++) {
-                Element entry = (Element) list.item(i);
-                Element name = (Element) entry.getElementsByTagName("name").item(0);
-                Element line = (Element) entry.getElementsByTagName("line").item(0);
-                Element scale = (Element) entry.getElementsByTagName("scale").item(0);
-                Element vendor = (Element) entry.getElementsByTagName("vendor").item(0);
-                Element description = (Element) entry.getElementsByTagName("description").item(0);
-                Element quantityInStock = (Element) entry.getElementsByTagName("quantityInStock").item(0);
-                Element buyPrice = (Element) entry.getElementsByTagName("buyPrice").item(0);
-                Element MSRP = (Element) entry.getElementsByTagName("MSRP").item(0);
-                Product product = new Product(
-                        name.getTextContent(),
-                        line.getTextContent(),
-                        scale.getTextContent(),
-                        vendor.getTextContent(),
-                        description.getTextContent(),
-                        Integer.valueOf(quantityInStock.getTextContent()),
-                        Double.valueOf(buyPrice.getTextContent()),
-                        Double.valueOf(MSRP.getTextContent())
-                );
-                products.add(product);
+            while (xmlStreamReader.hasNext()) {
+                int evenType = xmlStreamReader.next();
+
+                switch (evenType) {
+                    case XMLStreamReader.START_ELEMENT:
+                        if (xmlStreamReader.getLocalName().equals("vendor")) {
+                            vendor = xmlStreamReader.getElementText();
+                        }
+                        if (xmlStreamReader.getLocalName().equals("name")) {
+                            name = xmlStreamReader.getElementText();
+                        }
+                        break;
+                    case XMLStreamReader.END_ELEMENT:
+                        if (xmlStreamReader.getLocalName().equals("product")) {
+                            product = new Product();
+                            product.setName(name);
+                            product.setVendor(vendor);
+                            products.add(product);
+                            vendors.add(vendor);
+                        }
+
+                }
             }
 
-            gerarTabelaDetalhada(transformerFactory, db, products);
-        } catch(SAXException | ParserConfigurationException | IOException e) {
-            System.out.println("Error: " + e.getClass().getName() + " | " +  e.getMessage());
+            gerarResultado(vendors, products);
+
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error: " + e.getMessage(), e);
         }
     }
 }
